@@ -3325,3 +3325,160 @@ h1, h2, h3,
   font-size: 13px;
   cursor: pointer;
 }
+
+/* ===================================================================
+   Radius scale — one set of corners for the whole interface.
+
+   Audit found 22 distinct border-radius values. Everything visible now
+   maps to five: pill (fully round), control (inputs, chips, small
+   buttons), card (rows, cards, columns), panel (page sections, dialogs),
+   and the small radius for things inside cards. Hover states never change
+   a radius; they change background only.
+   =================================================================== */
+
+:root {
+  --r-sm: 8px;      /* inner details: timeline tags, kbd, tiny badges */
+  --r-control: 12px;/* inputs, selects, chips, small buttons, list rows */
+  --r-card: 16px;   /* cards, columns, empty states, nested surfaces */
+  --r-panel: 22px;  /* page sections, dialogs, drawers, topbar */
+  --r-pill: 999px;  /* badges, pill buttons, avatars */
+}
+
+/* Panels & dialogs */
+.panel,
+.journey-board,
+.followup-panel,
+.pipeline-summary,
+.task-strip,
+.welcome-row,
+.page-heading,
+.topbar,
+.drawer,
+.form-dialog,
+.auth-card,
+.tool-rail {
+  border-radius: var(--r-panel);
+}
+
+/* Cards, columns, rows that read as cards */
+.journey-column,
+.next-moves,
+.pipeline-column,
+.pipeline-card,
+.candidate-row,
+.client-item,
+.discover-preview,
+.drawer-block.insight,
+.draft-block,
+.drawer-essentials .drawer-block,
+.empty-state,
+.task-page-empty,
+.empty-client,
+.pipeline-empty-banner,
+.task-empty,
+.home-empty-row,
+.empty-row,
+.storage-warning,
+.auth-sent,
+.drop-hint,
+.overview-list li,
+.task-page-row {
+  border-radius: var(--r-card);
+}
+
+/* Controls */
+.form-dialog input,
+.form-dialog textarea,
+.form-dialog select,
+.filter-editor input,
+.auth-card input,
+.drawer select,
+.drawer textarea,
+.search-box,
+.sort-select,
+.pager button,
+.board-search,
+.next-move,
+.journey-row,
+.followup-row,
+.category-group,
+.command-suggestions button,
+.filter-tabs button,
+.move-control select,
+.draft-body,
+.toast,
+.toast button,
+.meta-pill,
+.demo-label {
+  border-radius: var(--r-control);
+}
+
+/* Fully round */
+.button,
+.badge,
+.avatar,
+.category-chip,
+.fact-pill,
+.circle-btn,
+.round-action,
+.rail-nav button,
+.rail-logo,
+.rail-bottom,
+.filter-count,
+.nav-count,
+.tab-count,
+.top-nav button,
+.close-btn,
+.task-check {
+  border-radius: var(--r-pill);
+}
+.timeline-kind,
+.contact-label,
+.auth-card code {
+  border-radius: var(--r-sm);
+}
+
+/* --------------------------- Next moves: a list of rounded rows, always */
+
+.next-moves {
+  padding: 16px;
+}
+.next-move {
+  border: 0;
+  padding: 10px 10px;
+  transition: background 150ms ease;
+}
+.next-move + .next-move {
+  margin-top: 4px;
+}
+.next-move:hover {
+  border-radius: var(--r-control);
+  background: rgba(255, 255, 255, 0.9);
+  transform: none;
+}
+.next-move.primary-move {
+  margin-bottom: 4px;
+}
+.next-move.primary-move:hover {
+  background: #232b36;
+}
+.next-move .move-icon {
+  border-radius: var(--r-control);
+}
+
+/* --------------------------- Empty rows inside columns: small, centred */
+
+.column-rows .empty-row,
+.journey-column .empty-row {
+  display: grid;
+  place-items: center;
+  min-height: 96px;
+  margin: 6px 0 0;
+  padding: 18px 16px;
+  border: 1px dashed rgba(23, 34, 48, 0.16);
+  background: rgba(255, 255, 255, 0.45);
+  color: var(--ink-4);
+  font-size: 12.5px;
+  line-height: 1.5;
+  text-align: center;
+}
