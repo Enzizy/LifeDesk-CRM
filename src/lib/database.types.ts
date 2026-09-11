@@ -232,6 +232,56 @@ export type Database = {
         }
         Relationships: []
       }
+      events: {
+        Row: {
+          created_at: string
+          ends_at: string | null
+          id: number
+          kind: string
+          location: string
+          notes: string
+          prospect_id: number | null
+          starts_at: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at?: string | null
+          id?: never
+          kind?: string
+          location?: string
+          notes?: string
+          prospect_id?: number | null
+          starts_at: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string | null
+          id?: never
+          kind?: string
+          location?: string
+          notes?: string
+          prospect_id?: number | null
+          starts_at?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_user_id_prospect_id_fkey"
+            columns: ["user_id", "prospect_id"]
+            isOneToOne: false
+            referencedRelation: "prospects"
+            referencedColumns: ["user_id", "id"]
+          },
+        ]
+      }
       message_drafts: {
         Row: {
           body: string

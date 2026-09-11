@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import * as db from "../lib/records";
-import type { Candidate, Prospect, Settings, Task } from "../types";
+import type { CalendarEvent, Candidate, Prospect, Settings, Task } from "../types";
 
 export type WorkspaceState = {
   prospects: Prospect[];
   tasks: Task[];
+  events: CalendarEvent[];
   candidates: Candidate[];
   settings: Settings;
   loading: boolean;
@@ -28,6 +29,7 @@ export type Workspace = WorkspaceState & {
   refresh: () => Promise<void>;
   refreshProspects: () => Promise<void>;
   refreshTasks: () => Promise<void>;
+  refreshEvents: () => Promise<void>;
   refreshCandidates: () => Promise<void>;
   setSettings: (settings: Settings) => void;
 };
@@ -36,6 +38,7 @@ export function useWorkspace(enabled: boolean): Workspace {
   const [state, setState] = useState<WorkspaceState>({
     prospects: [],
     tasks: [],
+    events: [],
     candidates: [],
     settings: emptySettings,
     loading: enabled,
@@ -46,13 +49,14 @@ export function useWorkspace(enabled: boolean): Workspace {
     if (!enabled) return;
     setState((current) => ({ ...current, loading: true }));
     try {
-      const [prospects, tasks, candidates, settings] = await Promise.all([
+      const [prospects, tasks, events, candidates, settings] = await Promise.all([
         db.listProspects(),
         db.listTasks(),
+        db.listEvents(),
         db.listPendingCandidates(),
         db.getSettings(),
       ]);
-      setState({ prospects, tasks, candidates, settings, loading: false, error: "" });
+      setState({ prospects, tasks, events, candidates, settings, loading: false, error: "" });
     } catch (error) {
       setState((current) => ({
         ...current,
@@ -70,6 +74,7 @@ export function useWorkspace(enabled: boolean): Workspace {
       setState({
         prospects: [],
         tasks: [],
+        events: [],
         candidates: [],
         settings: emptySettings,
         loading: false,
@@ -90,6 +95,11 @@ export function useWorkspace(enabled: boolean): Workspace {
     setState((current) => ({ ...current, tasks }));
   }, []);
 
+  const refreshEvents = useCallback(async () => {
+    const events = await db.listEvents();
+    setState((current) => ({ ...current, events }));
+  }, []);
+
   const refreshCandidates = useCallback(async () => {
     const candidates = await db.listPendingCandidates();
     setState((current) => ({ ...current, candidates }));
@@ -104,6 +114,7 @@ export function useWorkspace(enabled: boolean): Workspace {
     refresh,
     refreshProspects,
     refreshTasks,
+    refreshEvents,
     refreshCandidates,
     setSettings,
   };

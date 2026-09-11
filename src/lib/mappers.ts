@@ -7,7 +7,9 @@ import type { Database } from "./database.types";
 import type {
   Activity,
   ActivityKind,
+  CalendarEvent,
   Candidate,
+  EventKind,
   Confidence,
   Enrichment,
   MessageDraft,
@@ -28,6 +30,7 @@ export type ActivityRow = Tables["activities"]["Row"];
 export type CandidateRow = Tables["discovery_candidates"]["Row"];
 export type SettingsRow = Tables["user_settings"]["Row"];
 export type DraftRow = Tables["message_drafts"]["Row"];
+export type EventRow = Tables["events"]["Row"];
 
 const ACTIVITY_KINDS: ActivityKind[] = [
   "note",
@@ -35,8 +38,10 @@ const ACTIVITY_KINDS: ActivityKind[] = [
   "email_draft",
   "outreach",
   "task",
+  "meeting",
   "system",
 ];
+const EVENT_KIND_IDS: EventKind[] = ["meeting", "call", "follow_up", "deadline", "other"];
 
 const asStage = (value: string): Stage =>
   STAGES.includes(value as Stage) ? (value as Stage) : "New";
@@ -158,6 +163,20 @@ export function toSettings(row: SettingsRow | null): Settings {
     serviceOffers: row?.service_offers ?? [],
     discoveryLimit: row?.discovery_limit ?? 5,
     currencyCode: row?.currency_code ?? "PHP",
+  };
+}
+
+export function toEvent(row: EventRow): CalendarEvent {
+  return {
+    id: row.id,
+    prospectId: row.prospect_id,
+    title: row.title,
+    kind: EVENT_KIND_IDS.includes(row.kind as EventKind) ? (row.kind as EventKind) : "other",
+    startsAt: row.starts_at,
+    endsAt: row.ends_at ?? "",
+    location: row.location,
+    notes: row.notes,
+    createdAt: row.created_at,
   };
 }
 

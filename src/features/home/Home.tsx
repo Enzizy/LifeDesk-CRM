@@ -3,12 +3,13 @@ import { setTaskDone } from "../../lib/records";
 import { Avatar, Badge, Icon } from "../../components/ui";
 import { categoryLabel } from "../../lib/discovery";
 import type { Notify } from "../../components/ui";
-import type { Candidate, Prospect, Settings, Task } from "../../types";
-import { formatValue, initialsFor, plural, toneFor } from "../../types";
+import type { CalendarEvent, Candidate, Prospect, Settings, Task } from "../../types";
+import { eventKindLabel, formatValue, initialsFor, plural, toneFor } from "../../types";
 
 export function Home({
   prospects,
   tasks,
+  events,
   candidates,
   settings,
   notify,
@@ -19,9 +20,11 @@ export function Home({
   onAddTask,
   onDiscover,
   onRefreshTasks,
+  onEditEvent,
 }: {
   prospects: Prospect[];
   tasks: Task[];
+  events: CalendarEvent[];
   candidates: Candidate[];
   settings: Settings;
   notify: Notify;
@@ -32,7 +35,10 @@ export function Home({
   onAddTask: () => void;
   onDiscover: (command: string) => void;
   onRefreshTasks: () => Promise<void>;
+  onEditEvent: (event: CalendarEvent) => void;
 }) {
+  const todayKey = new Date().toDateString();
+  const todaysEvents = events.filter((event) => new Date(event.startsAt).toDateString() === todayKey);
   const currency = settings.currencyCode;
   const toQualify = prospects.filter(
     (p) => p.stage === "New" || p.stage === "Qualified",
@@ -317,12 +323,35 @@ export function Home({
         <div className="panel-head">
           <div>
             <h2>Today's focus</h2>
-            <p>{plural(openTasks.length, "open task")}</p>
+            <p>
+              {todaysEvents.length ? plural(todaysEvents.length, "event") + " · " : ""}
+              {plural(openTasks.length, "open task")}
+            </p>
           </div>
-          <button className="text-btn" onClick={() => onNavigate("Tasks")}>
-            View tasks <Icon name="arrow" size={14} />
-          </button>
+          <div className="heading-actions">
+            <button className="text-btn" onClick={() => onNavigate("Calendar")}>
+              Calendar <Icon name="arrow" size={14} />
+            </button>
+            <button className="text-btn" onClick={() => onNavigate("Tasks")}>
+              View tasks <Icon name="arrow" size={14} />
+            </button>
+          </div>
         </div>
+        {todaysEvents.length > 0 && (
+          <ul className="today-schedule">
+            {todaysEvents.map((event) => (
+              <li key={event.id}>
+                <button onClick={() => onEditEvent(event)}>
+                  <span className="today-time">
+                    {new Date(event.startsAt).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
+                  </span>
+                  <strong>{event.title}</strong>
+                  <small>{eventKindLabel(event.kind)}</small>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
         <div className="task-inline">
           {tasks.slice(0, 4).map((task) => (
             <label key={task.id} className={task.done ? "done" : ""}>

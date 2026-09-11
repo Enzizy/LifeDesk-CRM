@@ -3592,3 +3592,398 @@ select option {
 .form-dialog input[type="date"]:not(:focus):not([value]) {
   color: var(--ink-4);
 }
+
+/* ===================================================================
+   Calendar — month grid + day agenda, plus the schedule pieces on Home
+   and in the prospect drawer.
+   =================================================================== */
+
+.calendar-grid-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: var(--gap);
+  align-items: start;
+}
+.calendar-panel {
+  padding: var(--panel-pad);
+}
+.calendar-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.calendar-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.calendar-nav h2 {
+  margin: 0;
+  min-width: 170px;
+  text-align: center;
+  font-size: 17px;
+}
+.calendar-nav .round-action:first-child svg {
+  transform: rotate(180deg);
+}
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 6px;
+}
+.calendar-weekdays span {
+  padding: 0 8px 6px;
+  color: var(--ink-4);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.calendar-cells {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+.calendar-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  min-height: 104px;
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid rgba(23, 34, 48, 0.08);
+  border-radius: var(--r-control);
+  background: rgba(255, 255, 255, 0.62);
+  color: var(--ink-2);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, box-shadow 0.12s;
+}
+.calendar-cell:hover {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(23, 34, 48, 0.18);
+}
+.calendar-cell.outside {
+  background: rgba(255, 255, 255, 0.28);
+  color: var(--ink-5);
+}
+.calendar-cell.outside .calendar-daynum {
+  color: var(--ink-5);
+}
+.calendar-cell.is-selected {
+  border-color: #6876d9;
+  box-shadow: 0 0 0 3px #6876d926;
+  background: #fff;
+}
+.calendar-daynum {
+  align-self: flex-start;
+  display: grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: var(--r-pill);
+  color: var(--ink-2);
+  font-size: 12.5px;
+  font-weight: 750;
+}
+.calendar-cell.is-today .calendar-daynum {
+  background: var(--ink-1);
+  color: #fff;
+}
+.calendar-items {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.calendar-chip {
+  overflow: hidden;
+  padding: 2px 7px;
+  border-left: 3px solid transparent;
+  border-radius: var(--r-sm);
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.calendar-chip.kind-meeting   { background: #e4e9ff; border-color: #5d6fd9; color: #33418f; }
+.calendar-chip.kind-call      { background: #dcf0f8; border-color: #3a92bf; color: #21597a; }
+.calendar-chip.kind-follow_up { background: #ffefcf; border-color: #d9992a; color: #7a4d0c; }
+.calendar-chip.kind-deadline  { background: #fbe3e3; border-color: #cf4d4d; color: #7d2323; }
+.calendar-chip.kind-other     { background: #eef1f4; border-color: #97a3b2; color: #4f5d70; }
+.calendar-chip.kind-task      { background: #dff4ea; border-color: #2f9a6c; color: #1f6b4f; }
+.calendar-more {
+  padding-left: 7px;
+  color: var(--ink-4);
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+/* Agenda */
+.calendar-agenda {
+  position: sticky;
+  top: 104px;
+  padding: var(--panel-pad);
+}
+.agenda-list {
+  list-style: none;
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+}
+.agenda-item {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: start;
+  padding: 10px 12px;
+  border: 1px solid rgba(23, 34, 48, 0.08);
+  border-radius: var(--r-control);
+  background: rgba(255, 255, 255, 0.75);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+button.agenda-item {
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+}
+button.agenda-item:hover {
+  background: #fff;
+  border-color: rgba(23, 34, 48, 0.18);
+}
+.agenda-item.is-task {
+  background: rgba(223, 244, 234, 0.55);
+}
+.agenda-time {
+  padding-top: 2px;
+  color: var(--ink-3);
+  font-size: 12px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.agenda-body {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.agenda-body strong {
+  color: var(--ink-1);
+  font-size: 13.5px;
+}
+.agenda-body small {
+  color: var(--ink-3);
+  font-size: 12px;
+}
+.agenda-prospect {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  color: #4a5ac9;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.agenda-prospect .avatar {
+  width: 20px;
+  height: 20px;
+  font-size: 8px;
+}
+.badge.ev-meeting   { background: #e4e9ff; border-color: #c6d0ff; color: #33418f; }
+.badge.ev-call      { background: #dcf0f8; border-color: #b5dcec; color: #21597a; }
+.badge.ev-follow_up { background: #ffefcf; border-color: #f2d9a3; color: #7a4d0c; }
+.badge.ev-deadline  { background: #fbe3e3; border-color: #f1c2c2; color: #7d2323; }
+.badge.ev-other     { background: #eef1f4; border-color: #d8dee5; color: #4f5d70; }
+.badge.task         { background: #dff4ea; border-color: #b9e3cf; color: #1f6b4f; }
+.agenda-upcoming {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(23, 34, 48, 0.1);
+}
+.agenda-upcoming label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--ink-4);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.agenda-upcoming .plain-list {
+  list-style: none;
+  padding: 0;
+}
+.agenda-upcoming .text-btn {
+  padding: 3px 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+}
+.agenda-upcoming .text-btn:hover {
+  color: #4a5ac9;
+}
+
+/* Home: today's schedule above the task strip */
+.today-schedule {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 0;
+}
+.today-schedule button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid rgba(23, 34, 48, 0.08);
+  border-radius: var(--r-control);
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--ink-1);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.today-schedule button:hover {
+  background: #fff;
+  border-color: rgba(23, 34, 48, 0.18);
+}
+.today-time {
+  color: #4a5ac9;
+  font-size: 12px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.today-schedule strong {
+  overflow: hidden;
+  font-size: 13.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.today-schedule small {
+  color: var(--ink-4);
+  font-size: 11.5px;
+}
+
+/* Prospect drawer: mini agenda */
+.mini-agenda {
+  list-style: none;
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+}
+.mini-agenda button {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid rgba(23, 34, 48, 0.08);
+  border-radius: var(--r-control);
+  background: rgba(255, 255, 255, 0.75);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.mini-agenda button:hover {
+  background: #fff;
+}
+.mini-agenda svg {
+  flex: none;
+  color: #4a5ac9;
+}
+.mini-agenda strong {
+  display: block;
+  color: var(--ink-1);
+  font-size: 13px;
+}
+.mini-agenda small {
+  color: var(--ink-3);
+  font-size: 12px;
+}
+.empty-row.compact {
+  min-height: 0;
+  padding: 10px 12px;
+  text-align: left;
+}
+.insight-heading .text-btn svg {
+  vertical-align: -2px;
+}
+
+@media (max-width: 960px) {
+  .calendar-grid-layout {
+    grid-template-columns: 1fr;
+  }
+  .calendar-agenda {
+    position: static;
+  }
+  .calendar-cell {
+    min-height: 64px;
+    padding: 6px;
+  }
+  .calendar-chip {
+    display: none;
+  }
+  .calendar-items::after {
+    content: "";
+  }
+}
+
+/* Drag-to-reschedule */
+.calendar-chip.draggable {
+  cursor: grab;
+}
+.calendar-chip.is-dragging {
+  opacity: 0.4;
+}
+.calendar-cell.drop-target {
+  border-color: #6876d9;
+  border-style: dashed;
+  background: #eef1ff;
+}
+.reschedule-summary {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 14px;
+  align-items: center;
+  margin: 6px 0 12px;
+  padding: 14px 16px;
+  border: 1px solid rgba(23, 34, 48, 0.08);
+  border-radius: var(--r-card);
+  background: rgba(255, 255, 255, 0.75);
+}
+.reschedule-summary label {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--ink-4);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.reschedule-summary p {
+  margin: 0;
+  color: var(--ink-1);
+  font-size: 14px;
+  font-weight: 750;
+}
+.reschedule-summary > svg {
+  color: var(--ink-4);
+}

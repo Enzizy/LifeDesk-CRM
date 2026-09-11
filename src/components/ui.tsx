@@ -72,6 +72,18 @@ export function Icon({ name, size = 18 }: { name: string; size?: number }) {
         <path d="M9 8h6M9 12h6M9 16h3" />
       </>
     ),
+    calendar: (
+      <>
+        <rect x="3" y="5" width="18" height="16" rx="2" />
+        <path d="M3 10h18M8 3v4M16 3v4" />
+      </>
+    ),
+    clock: (
+      <>
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 7v5l3 2" />
+      </>
+    ),
   };
   return (
     <svg
@@ -196,9 +208,16 @@ export function Modal({
     // the previous build hit when switching records without closing first.
     if (dialog && !dialog.open) dialog.showModal();
     // showModal() moves focus to the first focusable element, which is the
-    // close button in every dialog here. Forms mark their first field with
-    // autoFocus; honour that. Read-first drawers keep the default.
-    dialog?.querySelector<HTMLElement>("[autofocus]")?.focus();
+    // close button in every dialog here. React's autoFocus runs before that
+    // and leaves no attribute behind, so for form dialogs focus the first
+    // field explicitly. Read-first drawers keep the default.
+    if (dialog && !dialog.classList.contains("drawer")) {
+      dialog
+        .querySelector<HTMLElement>(
+          'input:not([type="hidden"]):not([disabled]), textarea:not([disabled]), select:not([disabled])',
+        )
+        ?.focus();
+    }
   }, []);
   return (
     <div className="form-backdrop" onClick={onClose}>

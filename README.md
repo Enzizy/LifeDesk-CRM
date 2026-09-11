@@ -34,6 +34,7 @@ Everything lives in Supabase Postgres, scoped to your account by row-level secur
 | Geoapify business discovery — phone, website, email, socials | Connected (`discover-businesses`) |
 | Qualification + tailored outreach draft on approve | Connected (`qualify-prospect`) |
 | Drag-and-drop pipeline, dedicated Discover page | Connected |
+| Calendar — meetings, calls, follow-ups, deadlines; drag to reschedule with confirmation | Connected |
 | Google Places enrichment on approve (phone, website, rating) | Connected (`qualify-prospect`) |
 | Automated outreach | Not started — by design |
 

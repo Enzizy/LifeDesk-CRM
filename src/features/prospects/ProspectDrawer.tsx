@@ -10,8 +10,8 @@ import {
 import { qualifyProspect } from "../../lib/cloud";
 import { Avatar, Badge, Icon, Modal, Spinner } from "../../components/ui";
 import type { Notify } from "../../components/ui";
-import type { Activity, MessageDraft, Prospect, Stage } from "../../types";
-import { SOCIAL_LABELS, SOCIAL_NETWORKS, STAGES, formatValue } from "../../types";
+import type { Activity, CalendarEvent, MessageDraft, Prospect, Stage } from "../../types";
+import { SOCIAL_LABELS, SOCIAL_NETWORKS, STAGES, eventKindLabel, formatValue } from "../../types";
 import { categoryLabel } from "../../lib/discovery";
 
 const KIND_LABELS: Record<Activity["kind"], string> = {
@@ -20,27 +20,38 @@ const KIND_LABELS: Record<Activity["kind"], string> = {
   email_draft: "Draft",
   outreach: "Outreach",
   task: "Task",
+  meeting: "Scheduled",
   system: "System",
 };
 
 export function ProspectDrawer({
   prospect,
+  events,
   currencyCode,
   qualifyOnOpen,
   notify,
   onClose,
   onEdit,
+  onSchedule,
+  onEditEvent,
   onChanged,
 }: {
   prospect: Prospect;
+  /** Events already linked to this prospect. */
+  events: CalendarEvent[];
   currencyCode: string;
   /** Set when the drawer opens straight after an approval. */
   qualifyOnOpen: boolean;
   notify: Notify;
   onClose: () => void;
   onEdit: () => void;
+  onSchedule: () => void;
+  onEditEvent: (event: CalendarEvent) => void;
   onChanged: () => Promise<void>;
 }) {
+  const upcomingEvents = events
+    .filter((event) => new Date(event.startsAt).getTime() >= Date.now() - 60 * 60_000)
+    .slice(0, 3);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [drafts, setDrafts] = useState<MessageDraft[]>([]);
   const [loading, setLoading] = useState(true);
@@ -337,6 +348,43 @@ export function ProspectDrawer({
               Qualify and draft outreach
             </button>
           </>
+        )}
+      </div>
+
+      {/* --------------------------------------------------------- schedule */}
+      <div className="drawer-block">
+        <div className="insight-heading">
+          <label>Schedule</label>
+          <button className="text-btn" onClick={onSchedule}>
+            <Icon name="plus" size={13} /> Schedule
+          </button>
+        </div>
+        {upcomingEvents.length ? (
+          <ul className="mini-agenda">
+            {upcomingEvents.map((event) => (
+              <li key={event.id}>
+                <button onClick={() => onEditEvent(event)}>
+                  <Icon name="calendar" size={14} />
+                  <span>
+                    <strong>{event.title}</strong>
+                    <small>
+                      {new Date(event.startsAt).toLocaleString(undefined, {
+                        weekday: "short",
+                        day: "numeric",
+                        month: "short",
+                        hour: "numeric",
+                        minute: "2-digit",
+                      })}
+                      {" · "}
+                      {eventKindLabel(event.kind)}
+                    </small>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="empty-row compact">Nothing scheduled with them yet.</p>
         )}
       </div>
 

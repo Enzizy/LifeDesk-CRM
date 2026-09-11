@@ -112,7 +112,32 @@ export type ActivityKind =
   | "email_draft"
   | "outreach"
   | "task"
+  | "meeting"
   | "system";
+
+export type EventKind = "meeting" | "call" | "follow_up" | "deadline" | "other";
+export const EVENT_KINDS: { id: EventKind; label: string }[] = [
+  { id: "meeting", label: "Meeting" },
+  { id: "call", label: "Call" },
+  { id: "follow_up", label: "Follow-up" },
+  { id: "deadline", label: "Deadline" },
+  { id: "other", label: "Other" },
+];
+export const eventKindLabel = (kind: EventKind): string =>
+  EVENT_KINDS.find((entry) => entry.id === kind)?.label ?? "Event";
+
+export type CalendarEvent = {
+  id: number;
+  prospectId: number | null;
+  title: string;
+  kind: EventKind;
+  /** ISO timestamps. */
+  startsAt: string;
+  endsAt: string;
+  location: string;
+  notes: string;
+  createdAt: string;
+};
 
 export type Activity = {
   id: number;

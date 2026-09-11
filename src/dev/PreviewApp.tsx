@@ -29,12 +29,14 @@ export function PreviewApp() {
     prospects: empty ? [] : fixtures.prospects,
     tasks: empty ? [] : fixtures.tasks,
     candidates: empty ? [] : fixtures.candidates,
+    events: empty ? [] : fixtures.events,
     settings: fixtures.settings,
     loading: false,
     error: "",
     refresh: noop,
     refreshProspects: noop,
     refreshTasks: noop,
+    refreshEvents: noop,
     refreshCandidates: noop,
     setSettings: () => {},
   };
@@ -46,6 +48,8 @@ export function PreviewApp() {
     pipeline: "Pipeline",
     clients: "Clients",
     tasks: "Tasks",
+    calendar: "Calendar",
+    eventform: "Calendar",
     prospect: "Prospects",
     candidate: "Discover",
     taskform: "Tasks",
@@ -69,7 +73,9 @@ export function PreviewApp() {
                 ? { prospectForm: true }
                 : target === "settings"
                   ? { settings: true }
-                  : undefined
+                  : target === "eventform"
+                    ? { eventForm: true }
+                    : undefined
       }
     />
   );

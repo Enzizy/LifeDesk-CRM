@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { signOut } from "./lib/cloud";
+import { rescheduleEvent } from "./lib/records";
 import { useWorkspace } from "./hooks/useWorkspace";
 import type { Workspace as WorkspaceData } from "./hooks/useWorkspace";
 import { AuthGate, useSession } from "./features/auth/AuthGate";
@@ -13,17 +14,20 @@ import { PipelineView } from "./features/pipeline/PipelineView";
 import { ClientsView } from "./features/clients/ClientsView";
 import { TasksView } from "./features/tasks/TasksView";
 import { TaskForm } from "./features/tasks/TaskForm";
+import { CalendarView } from "./features/calendar/CalendarView";
+import { EventForm } from "./features/calendar/EventForm";
 import { SettingsDialog } from "./features/settings/SettingsDialog";
 import { Avatar, Icon, Spinner, Toast, useToast } from "./components/ui";
-import type { Candidate, Prospect } from "./types";
+import type { CalendarEvent, Candidate, Prospect } from "./types";
 import { initialsFor } from "./types";
 
-const PAGES = ["Home", "Discover", "Prospects", "Pipeline", "Clients", "Tasks"] as const;
+const PAGES = ["Home", "Discover", "Prospects", "Pipeline", "Calendar", "Clients", "Tasks"] as const;
 const NAV_ICONS: Record<string, string> = {
   Home: "home",
   Discover: "search",
   Prospects: "users",
   Pipeline: "funnel",
+  Calendar: "calendar",
   Clients: "briefcase",
   Tasks: "check",
 };
@@ -57,7 +61,14 @@ export function Workspace({
   workspace: WorkspaceData;
   initialPage?: string;
   /** Dev preview only: start with a drawer already open. */
-  previewOpen?: { prospect?: Prospect; candidate?: Candidate; taskForm?: boolean; prospectForm?: boolean; settings?: boolean };
+  previewOpen?: {
+    prospect?: Prospect;
+    candidate?: Candidate;
+    taskForm?: boolean;
+    prospectForm?: boolean;
+    settings?: boolean;
+    eventForm?: boolean;
+  };
 }) {
   const { toast, notify, dismiss } = useToast();
   const [page, setPage] = useState<string>(initialPage);
@@ -69,6 +80,11 @@ export function Workspace({
   const [showProspectForm, setShowProspectForm] = useState(Boolean(previewOpen?.prospectForm));
   const [showTaskForm, setShowTaskForm] = useState(Boolean(previewOpen?.taskForm));
   const [showSettings, setShowSettings] = useState(Boolean(previewOpen?.settings));
+  // Event form: null = closed; otherwise either an event to edit or defaults
+  // for a new one (a start time, and optionally the prospect it is about).
+  const [eventForm, setEventForm] = useState<
+    null | { event: CalendarEvent } | { start: string; prospectId?: number }
+  >(previewOpen?.eventForm ? { start: new Date().toISOString() } : null);
 
   const {
     prospects,
@@ -80,9 +96,11 @@ export function Workspace({
     refresh,
     refreshProspects,
     refreshTasks,
+    refreshEvents,
     refreshCandidates,
     setSettings,
   } = workspace;
+  const events = workspace.events;
 
   // The open drawer must follow the refreshed record, or an edit or a
   // qualification made from inside it would leave stale values on screen.
@@ -186,6 +204,7 @@ export function Workspace({
                 <Home
                   prospects={prospects}
                   tasks={tasks}
+                  events={events}
                   candidates={candidates}
                   settings={settings}
                   notify={notify}
@@ -196,6 +215,7 @@ export function Workspace({
                   onAddTask={() => setShowTaskForm(true)}
                   onDiscover={startDiscover}
                   onRefreshTasks={refreshTasks}
+                  onEditEvent={(event) => setEventForm({ event })}
                 />
               )}
               {page === "Discover" && (
@@ -224,6 +244,33 @@ export function Workspace({
                   notify={notify}
                   onOpen={(next) => openProspectDrawer(next)}
                   onChanged={refreshProspects}
+                />
+              )}
+              {page === "Calendar" && (
+                <CalendarView
+                  events={events}
+                  tasks={tasks}
+                  prospects={prospects}
+                  onAddEvent={(start) => setEventForm({ start })}
+                  onEditEvent={(event) => setEventForm({ event })}
+                  onReschedule={async (event, to) => {
+                    const name = prospects.find((p) => p.id === event.prospectId)?.name;
+                    try {
+                      await rescheduleEvent(event, to, name);
+                      await refreshEvents();
+                      notify(`Moved to ${new Date(to).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" })}`, {
+                        label: "Undo",
+                        onClick: () => {
+                          void rescheduleEvent({ ...event, startsAt: to, endsAt: event.endsAt ? new Date(new Date(to).getTime() + (new Date(event.endsAt).getTime() - new Date(event.startsAt).getTime())).toISOString() : "" }, event.startsAt, name)
+                            .then(refreshEvents)
+                            .catch(() => notify("That could not be undone.", undefined, "error"));
+                        },
+                      });
+                    } catch (error) {
+                      notify(error instanceof Error ? error.message : "The event could not be moved.", undefined, "error");
+                    }
+                  }}
+                  onOpenProspect={(next) => openProspectDrawer(next)}
                 />
               )}
               {page === "Clients" && (
@@ -264,9 +311,17 @@ export function Workspace({
       {openProspect && (
         <ProspectDrawer
           prospect={openProspect}
+          events={events.filter((event) => event.prospectId === openProspect.id)}
           currencyCode={settings.currencyCode}
           qualifyOnOpen={qualifyOnOpen}
           notify={notify}
+          onSchedule={() =>
+            setEventForm({
+              start: new Date(Date.now() + 86_400_000).toISOString().slice(0, 11) + "10:00:00.000Z",
+              prospectId: openProspect.id,
+            })
+          }
+          onEditEvent={(event) => setEventForm({ event })}
           onClose={() => {
             setProspect(null);
             setQualifyOnOpen(false);
@@ -298,6 +353,18 @@ export function Workspace({
           notify={notify}
           onClose={() => setShowTaskForm(false)}
           onSaved={refreshTasks}
+        />
+      )}
+
+      {eventForm && (
+        <EventForm
+          initial={"event" in eventForm ? eventForm.event : null}
+          prospects={prospects}
+          defaultStart={"start" in eventForm ? eventForm.start : undefined}
+          defaultProspectId={"prospectId" in eventForm ? eventForm.prospectId ?? null : null}
+          notify={notify}
+          onClose={() => setEventForm(null)}
+          onSaved={refreshEvents}
         />
       )}
 

@@ -9,6 +9,7 @@ import {
   toActivity,
   toCandidate,
   toDraft,
+  toEvent,
   toProspect,
   toSettings,
   toTask,
@@ -16,6 +17,7 @@ import {
 import type {
   Activity,
   ActivityKind,
+  CalendarEvent,
   Candidate,
   MessageDraft,
   Prospect,
@@ -23,7 +25,7 @@ import type {
   Stage,
   Task,
 } from "../types";
-import { initialsFor, toneFor } from "../types";
+import { eventKindLabel, initialsFor, toneFor } from "../types";
 import type { PersistedWorkspace } from "../storage";
 
 async function currentUserId(): Promise<string> {
@@ -221,6 +223,126 @@ export async function setTaskDone(id: number, done: boolean): Promise<Task> {
 
 export async function deleteTask(id: number): Promise<void> {
   const { error } = await requireSupabase().from("tasks").delete().eq("id", id);
+  if (error) throw error;
+}
+
+/* ----------------------------------------------------------------- events */
+
+export type EventDraft = {
+  title: string;
+  kind: CalendarEvent["kind"];
+  startsAt: string;
+  endsAt: string;
+  location: string;
+  notes: string;
+  prospectId: number | null;
+};
+
+export async function listEvents(): Promise<CalendarEvent[]> {
+  const { data, error } = await requireSupabase()
+    .from("events")
+    .select("*")
+    .order("starts_at", { ascending: true });
+  if (error) throw error;
+  return (data ?? []).map(toEvent);
+}
+
+const whenLabel = (iso: string) =>
+  new Date(iso).toLocaleString(undefined, {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+
+export async function createEvent(draft: EventDraft, prospectName?: string): Promise<CalendarEvent> {
+  const userId = await currentUserId();
+  const { data, error } = await requireSupabase()
+    .from("events")
+    .insert({
+      user_id: userId,
+      prospect_id: draft.prospectId,
+      title: draft.title,
+      kind: draft.kind,
+      starts_at: draft.startsAt,
+      ends_at: draft.endsAt || null,
+      location: draft.location,
+      notes: draft.notes,
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  const event = toEvent(data);
+  // Scheduling something with a prospect belongs on their timeline. A logging
+  // failure must not undo the event.
+  if (draft.prospectId) {
+    const withWhom = prospectName ? " with " + prospectName : "";
+    await logActivity(
+      draft.prospectId,
+      "meeting",
+      eventKindLabel(draft.kind) + " scheduled" + withWhom + ": " + draft.title + " · " + whenLabel(draft.startsAt),
+      { event_id: event.id, kind: draft.kind, starts_at: draft.startsAt },
+    ).catch(() => undefined);
+  }
+  return event;
+}
+
+export async function updateEvent(id: number, draft: EventDraft): Promise<CalendarEvent> {
+  const { data, error } = await requireSupabase()
+    .from("events")
+    .update({
+      prospect_id: draft.prospectId,
+      title: draft.title,
+      kind: draft.kind,
+      starts_at: draft.startsAt,
+      ends_at: draft.endsAt || null,
+      location: draft.location,
+      notes: draft.notes,
+    })
+    .eq("id", id)
+    .select()
+    .single();
+  if (error) throw error;
+  return toEvent(data);
+}
+
+/**
+ * Moves an event to another day, keeping its time of day and duration. Used
+ * by drag-to-reschedule on the calendar after the user confirms.
+ */
+export async function rescheduleEvent(
+  event: CalendarEvent,
+  newStartsAt: string,
+  prospectName?: string,
+): Promise<CalendarEvent> {
+  const duration = event.endsAt
+    ? new Date(event.endsAt).getTime() - new Date(event.startsAt).getTime()
+    : 0;
+  const { data, error } = await requireSupabase()
+    .from("events")
+    .update({
+      starts_at: newStartsAt,
+      ends_at: duration ? new Date(new Date(newStartsAt).getTime() + duration).toISOString() : null,
+    })
+    .eq("id", event.id)
+    .select()
+    .single();
+  if (error) throw error;
+  if (event.prospectId) {
+    const withWhom = prospectName ? " with " + prospectName : "";
+    await logActivity(
+      event.prospectId,
+      "meeting",
+      eventKindLabel(event.kind) + " rescheduled" + withWhom + ": " + event.title + " · " + whenLabel(event.startsAt) + " → " + whenLabel(newStartsAt),
+      { event_id: event.id, from: event.startsAt, to: newStartsAt },
+    ).catch(() => undefined);
+  }
+  return toEvent(data);
+}
+
+export async function deleteEvent(id: number): Promise<void> {
+  const { error } = await requireSupabase().from("events").delete().eq("id", id);
   if (error) throw error;
 }
 

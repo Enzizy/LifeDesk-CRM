@@ -3,7 +3,7 @@
 // overdue tasks, a qualified prospect with gaps and enrichment. Never imported
 // by production code.
 
-import type { Candidate, Prospect, Settings, Task } from "../types";
+import type { CalendarEvent, Candidate, Prospect, Settings, Task } from "../types";
 import { initialsFor, toneFor } from "../types";
 
 const at = (daysAgo: number) =>
@@ -199,6 +199,31 @@ export const candidates: Candidate[] = [
     category: "catering.restaurant",
     location: "Poblacion, Barili, Cebu",
   }),
+];
+
+const atTime = (dayOffset: number, hour: number, minute = 0) => {
+  const d = new Date();
+  d.setDate(d.getDate() + dayOffset);
+  d.setHours(hour, minute, 0, 0);
+  return d.toISOString();
+};
+const plusMinutes = (iso: string, minutes: number) =>
+  new Date(new Date(iso).getTime() + minutes * 60_000).toISOString();
+
+const ev = (id: number, title: string, kind: CalendarEvent["kind"], startsAt: string, minutes: number, prospectId: number | null, location = ""): CalendarEvent => ({
+  id, prospectId, title, kind, startsAt, endsAt: minutes ? plusMinutes(startsAt, minutes) : "", location, notes: "", createdAt: at(1),
+});
+
+export const events: CalendarEvent[] = [
+  ev(1, "Intro call", "call", atTime(0, 10, 30), 30, 4, "Phone"),
+  ev(2, "Site visit at the resort", "meeting", atTime(0, 15, 0), 90, 1, "Bellissimo Minolos, Barili"),
+  ev(3, "Send revised proposal", "deadline", atTime(2, 17, 0), 0, 5),
+  ev(4, "Follow up on Facebook page", "follow_up", atTime(3, 9, 0), 15, 2),
+  ev(5, "Kopi Corner content review", "meeting", atTime(6, 14, 0), 60, 6, "Google Meet"),
+  ev(6, "Proposal walkthrough", "meeting", atTime(6, 16, 0), 60, 5, "Their clinic, Lahug"),
+  ev(7, "Dentist demo", "call", atTime(9, 11, 0), 30, null),
+  ev(8, "Monthly retainer invoice", "deadline", atTime(14, 12, 0), 0, 6),
+  ev(9, "Check in with Shamrock", "follow_up", atTime(-3, 10, 0), 15, 3),
 ];
 
 export const tasks: Task[] = [
