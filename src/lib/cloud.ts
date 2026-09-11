@@ -24,16 +24,48 @@ export type DiscoveryResult = {
   skippedDuplicates: number;
 };
 
-export async function sendMagicLink(email: string): Promise<void> {
-  const normalizedEmail = email.trim().toLowerCase();
-  if (!/^\S+@\S+\.\S+$/.test(normalizedEmail)) {
-    throw new Error("Enter a valid email address.");
-  }
+const normalizeEmail = (email: string) => {
+  const normalized = email.trim().toLowerCase();
+  if (!/^\S+@\S+\.\S+$/.test(normalized)) throw new Error("Enter a valid email address.");
+  return normalized;
+};
 
-  const { error } = await requireSupabase().auth.signInWithOtp({
-    email: normalizedEmail,
-    options: { emailRedirectTo: window.location.origin },
+/**
+ * Password sign-in. There is deliberately no sign-up path in the app: this is
+ * a single-user workspace, and public sign-ups are switched off in the
+ * Supabase dashboard so only accounts created there can get in.
+ */
+export async function signInWithPassword(email: string, password: string): Promise<void> {
+  if (!password) throw new Error("Enter your password.");
+  const { error } = await requireSupabase().auth.signInWithPassword({
+    email: normalizeEmail(email),
+    password,
   });
+  if (error) {
+    // Supabase's message for a wrong password is "Invalid login credentials";
+    // say the same thing for an unknown email so the form does not reveal
+    // which addresses have accounts.
+    throw new Error(
+      /invalid login credentials/i.test(error.message)
+        ? "That email and password don't match."
+        : error.message,
+    );
+  }
+}
+
+/** Emails a one-time reset link. The link returns to the app in recovery mode. */
+export async function sendPasswordReset(email: string): Promise<void> {
+  const { error } = await requireSupabase().auth.resetPasswordForEmail(
+    normalizeEmail(email),
+    { redirectTo: window.location.origin },
+  );
+  if (error) throw error;
+}
+
+/** Sets a new password for the signed-in (or recovering) user. */
+export async function updatePassword(password: string): Promise<void> {
+  if (password.length < 8) throw new Error("Use at least 8 characters.");
+  const { error } = await requireSupabase().auth.updateUser({ password });
   if (error) throw error;
 }
 

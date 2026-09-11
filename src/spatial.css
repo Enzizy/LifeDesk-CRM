@@ -3296,3 +3296,32 @@ h1, h2, h3,
   box-sizing: border-box;
   min-height: 260px;
 }
+
+/* ------------------------------------------------- password sign-in */
+.password-field {
+  position: relative;
+}
+.password-field input {
+  padding-right: 60px;
+}
+.password-field .text-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  padding: 4px 6px;
+  background: transparent;
+  font-size: 12px;
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.auth-switch {
+  justify-self: start;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  font-size: 13px;
+  cursor: pointer;
+}

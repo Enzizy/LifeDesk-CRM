@@ -21,14 +21,14 @@ npm run build
 
 ## Storage
 
-Everything lives in Supabase Postgres, scoped to your account by row-level security. Sign in with a magic link; your prospects, tasks, activity timeline, and discovery candidates then follow you to any browser or computer.
+Everything lives in Supabase Postgres, scoped to your account by row-level security. Sign in with your email and password; your prospects, tasks, activity timeline, and discovery candidates then follow you to any browser or computer. There is no sign-up — the owner creates accounts in the Supabase dashboard.
 
 ## What is connected
 
 | Piece | State |
 | --- | --- |
 | Postgres schema, RLS policies, migrations | Connected |
-| Magic-link sign-in | Connected |
+| Email + password sign-in, reset flow, no public sign-up | Connected |
 | Prospects, tasks, activity timeline, settings | Connected |
 | Gemini command interpretation | Connected (`assistant-command`) |
 | Geoapify business discovery — phone, website, email, socials | Connected (`discover-businesses`) |

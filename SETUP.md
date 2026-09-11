@@ -41,6 +41,23 @@ API key into `GEOAPIFY_API_KEY`.
 - One discovery run costs two credits: one geocode plus one Places search, regardless of
   how many businesses come back. The result limit defaults to 5 and is capped at 25.
 
+## Accounts and sign-in
+
+LifeDesk uses email + password and has **no sign-up screen**. Accounts are created in the
+Supabase dashboard, and public sign-ups must be switched off so nobody can create their own:
+
+1. **Authentication → Sign In / Providers → Email**: keep *Enable email* on, turn **Allow new
+   users to sign up** off.
+2. **Authentication → Users → Add user → Create new user**: enter the email and password and
+   tick **Auto confirm user**. Skipping auto-confirm sends a verification email that the
+   account cannot sign in without.
+3. **Authentication → URL Configuration → Redirect URLs**: include every origin the app is
+   served from (`http://localhost:5173/**` and your Vercel URL). Password-reset links return
+   to the app through this allowlist.
+
+"Forgot your password?" on the sign-in screen emails a reset link; the app then asks for a
+new password before showing the workspace.
+
 ## Connect and apply the database
 
 Authenticate the CLI, link this checkout to the hosted project, and push migrations:

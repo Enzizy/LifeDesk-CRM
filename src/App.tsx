@@ -29,9 +29,9 @@ const NAV_ICONS: Record<string, string> = {
 };
 
 export default function App() {
-  const { session, ready } = useSession();
+  const { session, ready, recovering, finishRecovery } = useSession();
   return (
-    <AuthGate session={session} ready={ready}>
+    <AuthGate session={session} ready={ready} recovering={recovering} onRecovered={finishRecovery}>
       <LiveWorkspace email={session?.user.email ?? ""} />
     </AuthGate>
   );
