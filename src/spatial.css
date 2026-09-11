@@ -3482,3 +3482,113 @@ h1, h2, h3,
   line-height: 1.5;
   text-align: center;
 }
+
+/* ===================================================================
+   Form fields — one system for inputs, selects, dates, numbers.
+
+   Every field is 42px tall with the same border, radius, and focus ring.
+   Selects lose the OS arrow and get the same chevron everywhere. The
+   OPEN list of a native select is drawn by the operating system and
+   cannot be styled; the closed control is what the app owns, so that is
+   what is made consistent.
+   =================================================================== */
+
+.form-dialog input:not([type="range"]):not([type="checkbox"]),
+.form-dialog textarea,
+.form-dialog select,
+.filter-editor input:not([type="range"]),
+.auth-card input,
+.drawer select,
+.drawer textarea,
+.sort-select {
+  min-height: 42px;
+  border: 1px solid rgba(23, 34, 48, 0.16);
+  border-radius: var(--r-control);
+  padding: 10px 12px;
+  background: var(--glass-3);
+  color: var(--ink-1);
+  font: inherit;
+  font-size: 13.5px;
+  line-height: 1.4;
+  outline: 0;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+.form-dialog input:hover,
+.form-dialog select:hover,
+.filter-editor input:hover,
+.drawer select:hover,
+.sort-select:hover {
+  border-color: rgba(23, 34, 48, 0.3);
+}
+.form-dialog input:focus,
+.form-dialog textarea:focus,
+.form-dialog select:focus,
+.filter-editor input:focus,
+.auth-card input:focus,
+.drawer select:focus,
+.drawer textarea:focus,
+.sort-select:focus {
+  border-color: #6876d9;
+  box-shadow: 0 0 0 3px #6876d926;
+  background: #fff;
+}
+
+/* Selects: our chevron, not the OS arrow. */
+.form-dialog select,
+.drawer select,
+.sort-select,
+.move-control select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 36px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234f5d70' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  cursor: pointer;
+}
+.form-dialog select:disabled,
+.drawer select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+/* Keep the option list readable if the OS honours these (Chromium does). */
+select option {
+  color: var(--ink-1);
+  background: #fff;
+  font-size: 13px;
+}
+
+/* The quiet in-card control on the kanban keeps its own compact look. */
+.move-control select {
+  min-height: 0;
+  padding: 3px 22px 3px 6px;
+  background-size: 12px;
+  background-position: right 6px center;
+}
+
+/* Date and number inputs: same height as text inputs; tidy native icons. */
+.form-dialog input[type="date"],
+.form-dialog input[type="number"],
+.filter-editor input[type="number"] {
+  -moz-appearance: textfield;
+}
+.form-dialog input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.55;
+  padding: 2px;
+  border-radius: 6px;
+}
+.form-dialog input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+  background: rgba(23, 34, 48, 0.06);
+}
+.form-dialog input[type="number"]::-webkit-inner-spin-button,
+.filter-editor input[type="number"]::-webkit-inner-spin-button {
+  opacity: 0.55;
+  height: 26px;
+}
+.form-dialog input[type="date"]:invalid,
+.form-dialog input[type="date"]:not(:focus):not([value]) {
+  color: var(--ink-4);
+}

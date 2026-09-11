@@ -57,7 +57,7 @@ export function Workspace({
   workspace: WorkspaceData;
   initialPage?: string;
   /** Dev preview only: start with a drawer already open. */
-  previewOpen?: { prospect?: Prospect; candidate?: Candidate };
+  previewOpen?: { prospect?: Prospect; candidate?: Candidate; taskForm?: boolean; prospectForm?: boolean; settings?: boolean };
 }) {
   const { toast, notify, dismiss } = useToast();
   const [page, setPage] = useState<string>(initialPage);
@@ -66,9 +66,9 @@ export function Workspace({
   const [prospect, setProspect] = useState<Prospect | null>(previewOpen?.prospect ?? null);
   const [qualifyOnOpen, setQualifyOnOpen] = useState(false);
   const [editing, setEditing] = useState<Prospect | null>(null);
-  const [showProspectForm, setShowProspectForm] = useState(false);
-  const [showTaskForm, setShowTaskForm] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
+  const [showProspectForm, setShowProspectForm] = useState(Boolean(previewOpen?.prospectForm));
+  const [showTaskForm, setShowTaskForm] = useState(Boolean(previewOpen?.taskForm));
+  const [showSettings, setShowSettings] = useState(Boolean(previewOpen?.settings));
 
   const {
     prospects,

@@ -99,7 +99,6 @@ export function TasksView({
         <div>
           <p className="eyebrow">Your workspace</p>
           <h1>Tasks</h1>
-          <p className="heading-sub">Keep small promises to your future clients.</p>
         </div>
         <button className="button primary" onClick={onAddTask}>
           <Icon name="plus" size={15} />
@@ -178,7 +177,6 @@ export function TasksView({
         <div className="panel-head">
           <div>
             <h2>At a glance</h2>
-            <p>Where your attention goes first.</p>
           </div>
         </div>
         <ul className="overview-list">

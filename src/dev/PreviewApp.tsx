@@ -8,6 +8,7 @@
 //   ?preview=signin
 //   ?preview=prospect       (prospect drawer over the Prospects page)
 //   ?preview=candidate      (candidate drawer over the Discover page)
+//   ?preview=taskform | prospectform | settings   (dialogs over Tasks / Prospects / Home)
 //   &empty=1                (same page with no data — the empty states)
 
 import { Workspace } from "../App";
@@ -47,6 +48,9 @@ export function PreviewApp() {
     tasks: "Tasks",
     prospect: "Prospects",
     candidate: "Discover",
+    taskform: "Tasks",
+    prospectform: "Prospects",
+    settings: "Home",
   };
 
   return (
@@ -59,7 +63,13 @@ export function PreviewApp() {
           ? { prospect: fixtures.prospects[0] }
           : target === "candidate"
             ? { candidate: fixtures.candidates[0] }
-            : undefined
+            : target === "taskform"
+              ? { taskForm: true }
+              : target === "prospectform"
+                ? { prospectForm: true }
+                : target === "settings"
+                  ? { settings: true }
+                  : undefined
       }
     />
   );

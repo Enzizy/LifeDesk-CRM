@@ -91,9 +91,6 @@ export function Home({
         <div>
           <p className="eyebrow">Your workspace</p>
           <h1>Client journeys</h1>
-          <p className="heading-sub">
-            Good businesses. Meaningful conversations. Your next chapter.
-          </p>
         </div>
         <div className="heading-actions">
           <button className="button secondary" onClick={onAddProspect}>
@@ -109,9 +106,6 @@ export function Home({
         <div className="board-head">
           <div>
             <h2>New business outreach</h2>
-            <p>
-              <span className="status-dot" /> Your personal growth workspace
-            </p>
           </div>
           <div
             className="board-progress"
@@ -176,7 +170,6 @@ export function Home({
           <section className="next-moves">
             <header>
               <span>Next moves</span>
-              <small>Based on your pipeline</small>
             </header>
             <button
               className="next-move primary-move"
@@ -235,7 +228,6 @@ export function Home({
           <div className="panel-head">
             <div>
               <h2>Next on your list</h2>
-              <p>A little follow-through goes a long way.</p>
             </div>
             <button
               className="circle-btn"

@@ -56,7 +56,6 @@ export function ProspectsView({
         <div>
           <p className="eyebrow">Sales workspace</p>
           <h1>Prospects</h1>
-          <p className="heading-sub">Every business you have decided to pursue.</p>
         </div>
         <button className="button primary" onClick={onAddProspect}>
           <Icon name="plus" size={15} /> Add prospect

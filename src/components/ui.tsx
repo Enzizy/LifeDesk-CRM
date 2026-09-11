@@ -195,6 +195,10 @@ export function Modal({
     // showModal() throws InvalidStateError if the dialog is already open, which
     // the previous build hit when switching records without closing first.
     if (dialog && !dialog.open) dialog.showModal();
+    // showModal() moves focus to the first focusable element, which is the
+    // close button in every dialog here. Forms mark their first field with
+    // autoFocus; honour that. Read-first drawers keep the default.
+    dialog?.querySelector<HTMLElement>("[autofocus]")?.focus();
   }, []);
   return (
     <div className="form-backdrop" onClick={onClose}>

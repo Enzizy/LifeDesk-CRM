@@ -22,9 +22,6 @@ export function ClientsView({
         <div>
           <p className="eyebrow">Relationships</p>
           <h1>Clients</h1>
-          <p className="heading-sub">
-            Your active relationships and the work attached to them.
-          </p>
         </div>
         <button className="button secondary" onClick={() => onNavigate("Pipeline")}>
           <Icon name="funnel" size={15} />
