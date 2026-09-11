@@ -1,0 +1,37 @@
+{
+  "name": "lifedesk-crm",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b --pretty false",
+    "screenshots": "node scripts/screenshot.mjs",
+    "supabase:start": "supabase start",
+    "supabase:stop": "supabase stop",
+    "supabase:reset": "supabase db reset",
+    "supabase:push": "supabase db push",
+    "supabase:types": "supabase gen types typescript --linked > src/lib/database.types.ts && node scripts/sync-function-types.mjs",
+    "supabase:types:local": "supabase gen types typescript --local > src/lib/database.types.ts && node scripts/sync-function-types.mjs",
+    "functions:serve": "supabase functions serve --env-file supabase/functions/.env.local",
+    "functions:check": "deno check --config supabase/functions/assistant-command/deno.json supabase/functions/assistant-command/index.ts && deno check --config supabase/functions/discover-businesses/deno.json supabase/functions/discover-businesses/index.ts && deno check --config supabase/functions/qualify-prospect/deno.json supabase/functions/qualify-prospect/index.ts",
+    "functions:deploy": "supabase functions deploy assistant-command discover-businesses qualify-prospect"
+  },
+  "dependencies": {
+    "@fontsource-variable/manrope": "^5.3.0",
+    "@supabase/supabase-js": "2.116.0",
+    "@vitejs/plugin-react": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "typescript": "latest",
+    "vite": "latest"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "playwright-core": "^1.49.1",
+    "supabase": "2.117.0"
+  }
+}
