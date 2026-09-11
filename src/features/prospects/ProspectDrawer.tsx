@@ -195,6 +195,16 @@ export function ProspectDrawer({
   };
 
   const socials = SOCIAL_NETWORKS.filter((network) => prospect.socials[network]);
+  const site = prospect.enrichment?.website ?? null;
+  const sourceOf = (network: (typeof SOCIAL_NETWORKS)[number]) =>
+    prospect.enrichment?.socialSource?.[network];
+  const siteHost = (url: string) => {
+    try {
+      return new URL(url).hostname.replace(/^www\./, "");
+    } catch {
+      return url;
+    }
+  };
 
   return (
     <Modal labelledBy="prospect-title" onClose={onClose} className="drawer wide">
@@ -251,6 +261,24 @@ export function ProspectDrawer({
           <ContactRow label="Phone" value={prospect.phone} href={prospect.phone ? `tel:${prospect.phone}` : ""} />
           <ContactRow label="Email" value={prospect.email} href={prospect.email ? `mailto:${prospect.email}` : ""} />
           <ContactRow label="Website" value={prospect.website} href={prospect.website} />
+          {site && (
+            <div className={`site-check ${site.offDomain || !site.reachable ? "bad" : site.suspicious ? "warn" : "ok"}`}>
+              <Icon name={site.offDomain || !site.reachable ? "close" : "check"} size={12} />
+              {site.offDomain ? (
+                <span>
+                  Redirects to <strong>{siteHost(site.finalUrl)}</strong> — the domain no longer serves their site
+                </span>
+              ) : !site.reachable ? (
+                <span>Site not reachable{site.status ? ` (HTTP ${site.status})` : ""}</span>
+              ) : site.suspicious ? (
+                <span>Site looks parked or taken over</span>
+              ) : (
+                <span>
+                  Live{site.https ? " · HTTPS" : " · no HTTPS"}{site.hasViewport ? " · mobile-friendly" : " · not mobile-friendly"}
+                </span>
+              )}
+            </div>
+          )}
           {socials.length ? (
             socials.map((network) => (
               <ContactRow
@@ -258,10 +286,28 @@ export function ProspectDrawer({
                 label={SOCIAL_LABELS[network]}
                 value={prospect.socials[network] ?? ""}
                 href={prospect.socials[network] ?? ""}
+                tag={
+                  sourceOf(network) === "website"
+                    ? "from their site"
+                    : sourceOf(network) === "search"
+                      ? "found via search · verify"
+                      : undefined
+                }
               />
             ))
           ) : (
-            <ContactRow label="Socials" value="" href="" />
+            <ContactRow
+              label="Socials"
+              value=""
+              href=""
+              tag={
+                prospect.enrichment?.socialSearch === "done"
+                  ? "searched, none found"
+                  : prospect.enrichment?.socialSearch === "unavailable"
+                    ? "search unavailable on free tier"
+                    : undefined
+              }
+            />
           )}
         </div>
         {prospect.enrichment ? (
@@ -502,21 +548,24 @@ export function ProspectDrawer({
   );
 }
 
-function ContactRow({ label, value, href }: { label: string; value: string; href: string }) {
+function ContactRow({ label, value, href, tag }: { label: string; value: string; href: string; tag?: string }) {
   return (
     <div className={`contact-row ${value ? "" : "missing"}`}>
       <span className="contact-label">{label}</span>
-      {value ? (
-        href ? (
-          <a href={href} target={href.startsWith("http") ? "_blank" : undefined} rel="noreferrer noopener">
-            {value}
-          </a>
+      <span className="contact-value">
+        {value ? (
+          href ? (
+            <a href={href} target={href.startsWith("http") ? "_blank" : undefined} rel="noreferrer noopener">
+              {value}
+            </a>
+          ) : (
+            <span>{value}</span>
+          )
         ) : (
-          <span>{value}</span>
-        )
-      ) : (
-        <span className="contact-missing">Not listed</span>
-      )}
+          <span className="contact-missing">Not listed</span>
+        )}
+        {tag && <span className="contact-tag">{tag}</span>}
+      </span>
     </div>
   );
 }

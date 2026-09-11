@@ -3987,3 +3987,35 @@ button.agenda-item:hover {
 .reschedule-summary > svg {
   color: var(--ink-4);
 }
+
+/* Website evidence and social provenance in the prospect drawer */
+.site-check {
+  grid-column: 1 / -1;
+  padding-left: 94px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: -2px 0 4px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.site-check.ok { color: #1f6b4f; }
+.site-check.warn { color: #8a5a12; }
+.site-check.bad { color: #9b2c2c; }
+.site-check strong { font-weight: 800; }
+.contact-value {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+.contact-tag {
+  border-radius: var(--r-pill);
+  padding: 1px 7px;
+  background: rgba(23, 34, 48, 0.06);
+  color: var(--ink-4);
+  font-size: 10.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}

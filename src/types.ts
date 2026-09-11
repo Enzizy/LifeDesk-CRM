@@ -71,6 +71,20 @@ export type Prospect = {
 };
 
 /** What Google Places returned for an approved prospect, kept for provenance. */
+export type WebsiteCheck = {
+  reachable: boolean;
+  status: number | null;
+  finalUrl: string;
+  offDomain: boolean;
+  suspicious: boolean;
+  title: string;
+  https: boolean;
+  hasViewport: boolean;
+  checkedAt: string;
+};
+
+export type SocialSource = "provider" | "website" | "search";
+
 export type Enrichment = {
   provider: string;
   placeId: string;
@@ -81,6 +95,9 @@ export type Enrichment = {
   businessStatus: string;
   primaryType: string;
   enrichedAt: string;
+  website: WebsiteCheck | null;
+  socialSource: Partial<Record<SocialNetwork, SocialSource>>;
+  socialSearch: "done" | "unavailable" | "skipped" | "";
 };
 
 export type MessageDraft = {

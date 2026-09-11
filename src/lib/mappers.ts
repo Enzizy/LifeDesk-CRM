@@ -13,6 +13,8 @@ import type {
   Confidence,
   Enrichment,
   MessageDraft,
+  SocialSource,
+  WebsiteCheck,
   Origin,
   Prospect,
   Settings,
@@ -59,13 +61,38 @@ const asSocials = (value: unknown): Socials =>
         ),
       )
     : {};
+const asWebsiteCheck = (value: unknown): WebsiteCheck | null => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const w = value as Record<string, unknown>;
+  if (typeof w.reachable !== "boolean") return null;
+  return {
+    reachable: w.reachable,
+    status: typeof w.status === "number" ? w.status : null,
+    finalUrl: typeof w.finalUrl === "string" ? w.finalUrl : "",
+    offDomain: w.offDomain === true,
+    suspicious: w.suspicious === true,
+    title: typeof w.title === "string" ? w.title : "",
+    https: w.https === true,
+    hasViewport: w.hasViewport === true,
+    checkedAt: typeof w.checkedAt === "string" ? w.checkedAt : "",
+  };
+};
+const asSocialSource = (value: unknown): Enrichment["socialSource"] => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const out: Enrichment["socialSource"] = {};
+  for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+    if (v === "provider" || v === "website" || v === "search") out[k as keyof typeof out] = v as SocialSource;
+  }
+  return out;
+};
 const asEnrichment = (value: unknown): Enrichment | null => {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   const e = value as Record<string, unknown>;
-  if (typeof e.placeId !== "string" || !e.placeId) return null;
+  // A website check can exist without a Google match; keep the record then too.
+  if ((typeof e.placeId !== "string" || !e.placeId) && !e.website) return null;
   return {
     provider: typeof e.provider === "string" ? e.provider : "google_places",
-    placeId: e.placeId,
+    placeId: typeof e.placeId === "string" ? e.placeId : "",
     matchedName: typeof e.matchedName === "string" ? e.matchedName : "",
     mapsUri: typeof e.mapsUri === "string" ? e.mapsUri : "",
     rating: typeof e.rating === "number" ? e.rating : null,
@@ -73,6 +100,12 @@ const asEnrichment = (value: unknown): Enrichment | null => {
     businessStatus: typeof e.businessStatus === "string" ? e.businessStatus : "",
     primaryType: typeof e.primaryType === "string" ? e.primaryType : "",
     enrichedAt: typeof e.enrichedAt === "string" ? e.enrichedAt : "",
+    website: asWebsiteCheck(e.website),
+    socialSource: asSocialSource(e.socialSource),
+    socialSearch:
+      e.socialSearch === "done" || e.socialSearch === "unavailable" || e.socialSearch === "skipped"
+        ? e.socialSearch
+        : "",
   };
 };
 const asKind = (value: string): ActivityKind =>
