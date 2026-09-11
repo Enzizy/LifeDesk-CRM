@@ -110,6 +110,37 @@ functions deploy` only bundles files under `supabase/`, so the functions cannot 
 `src/lib/database.types.ts` directly — `npm run supabase:types` regenerates it and mirrors
 it into `_shared/` automatically.
 
+## Deploy to Vercel
+
+The app is a static Vite build; `vercel.json` sets the framework, output directory, an
+SPA rewrite, and cache/security headers. Dependencies are pinned so Vercel installs
+exactly what was verified locally.
+
+1. **Import the repo** at [vercel.com/new](https://vercel.com/new) → *Enzizy/LifeDesk-CRM*.
+   Vercel reads `vercel.json`; leave the detected settings alone.
+2. **Environment variables** (Project → Settings → Environment Variables), for
+   Production and Preview:
+
+   | Name | Value |
+   | --- | --- |
+   | `VITE_SUPABASE_URL` | `https://crrkxxewmcmvyujiddbg.supabase.co` |
+   | `VITE_SUPABASE_PUBLISHABLE_KEY` | the `sb_publishable_…` key from Supabase → Connect |
+
+   Nothing else. Gemini, Geoapify, and Google keys live only in Supabase function
+   secrets and never reach Vercel.
+3. **Deploy.** Note the URL Vercel gives you, e.g. `https://lifedesk-crm.vercel.app`.
+4. **Allow that URL in Supabase Auth** — this is the step that breaks sign-in if skipped.
+   Supabase Dashboard → Authentication → URL Configuration:
+   - **Site URL**: your Vercel URL
+   - **Redirect URLs**: add `https://<your-app>.vercel.app/**` (keep
+     `http://localhost:5173/**` for local work)
+
+   The magic link redirects to `window.location.origin`; Supabase only honours
+   origins on this allowlist.
+
+Edge Functions already allow any origin, so no CORS change is needed. Every push to
+`main` redeploys automatically.
+
 ## Codex Supabase MCP (optional)
 
 Add and authenticate the Supabase MCP server, then use `/mcp` in Codex to verify it:
